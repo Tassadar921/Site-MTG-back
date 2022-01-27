@@ -18,7 +18,7 @@ module.exports.signIn= async function (name, password, mail, res){
       }
       if (output === '') {
         json.unshift({name: name, password: password, mail: mail});
-        fs.writeFile(path, JSON.stringify(json), function (err) {});
+        fs.writeFile(path, JSON.stringify(json, null, 2), function (err) {});
         output = 'Utilisateur créé';
       }
     }else

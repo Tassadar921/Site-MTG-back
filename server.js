@@ -13,7 +13,8 @@ app.use(methodOverride());
 app.use(cors());
 
 app.post('/signIn', function (req, res) {
-  check.signIn(req.body.name, req.body.password, req.body.mail, res);
+  mail.send()
+  // check.signIn(req.body.name, req.body.password, req.body.mail, res);
 });
 
 app.post('/login', function (req, res) {
