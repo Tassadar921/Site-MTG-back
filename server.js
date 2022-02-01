@@ -12,24 +12,24 @@ app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(cors());
 
-app.post('/signUp', function (req, res) {
-  account.signIn(req.body.name, req.body.password, req.body.mail, res);
-});
-
-app.post('/login', function (req, res) {
-  account.login(req.body.name, req.body.password, res);
-});
-
-app.post('/mail', function(req,res){
-  mail.send(res, req.body.mail);
+app.post('/mailToken', function(req,res){
+  mail.sendToken(res, req.body.mail, req.body.name);
 });
 
 app.post('/token', function(req,res){
   mail.checkToken(res, req.body);
 });
 
-app.post('/accountExists', function(req,res){
-  account.exists(req.body.name, req.body.mail, res);
+app.post('/resetPassword', function(req,res){
+  mail.resetPassword(res, req.body.mail);
+});
+
+app.post('/signUp', function (req, res) {
+  account.signUp(req.body.name, req.body.password, req.body.mail, res);
+});
+
+app.post('/login', function (req, res) {
+  account.login(req.body.name, req.body.password, res);
 });
 
 if(app.listen(process.env.PORT || 8080)){
