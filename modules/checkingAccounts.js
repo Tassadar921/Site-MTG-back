@@ -1,56 +1,50 @@
 const fs = require('fs');
 const path = process.cwd()+'/data/accounts.json';
 
-module.exports.signUp= function (name, password, mail, res){
-  const json=require(path);
+module.exports.signUp= function (name, password, mail, con, res){
   let output='';
   let created=0;
-  fs.access('../data/accounts.json', fs.constants.R_OK, function (err) {
-    if(err){
 
-      if (output === '') {
-        json.unshift({name: name, password: password, mail: mail});
-        fs.writeFile(path, JSON.stringify(json, null, 2), function (err) {});
-        output = 'Utilisateur créé';
-        created=1;
-      }
-    }else
-    {
-      output = 'Base de donnée inexistante';
+  let insert = "INSERT INTO compte (name, password, mail) VALUES (name, password, mail)";
+  con.query(insert, (err, result) => {
+    if (err) {
+      throw err;
+    } else {
+      console.log(result);
+      console.log('on insère :', )
+      output = 'Utilisateur créé';
+      created = 1;
     }
-    res.json({message:output, return: created});
   });
+
+  res.json({message: output, return: created});
+
 };
 
-module.exports.login= function (name, password, res){
-  const json=require(path);
-  let output='';
+module.exports.login= function (name, password, con, res){
+  let state='';
   let exists=false;
   let connected=false;
-  fs.access('../data/accounts.json', fs.constants.R_OK, function (err) {
+  con.query('SELECT * FROM compte', (err, result)=>{
     if(err){
-
-      for(const line of json) {
+      throw err
+    }else{
+      for(const line of result) {
         if((line.name===name || line.mail===name) && line.password===password){
           exists=true;
           connected=true;
-          output='Connecté';
-          console.log('name et pass ok');
+          state='Connecté';
         }else{
           if((line.name===name || line.mail===name) && line.password!==password){
-            output='Mot de passe incorrect';
+            state='Mot de passe incorrect';
             exists=true;
-            console.log('name ok mais pas pass');
           }
         }
       }
       if(exists===false){
-        console.log('name introuvable');
-        output='Compte introuvable';
+        state='Compte introuvable';
       }
-    }else{
-      output = 'Base de donnée inexistante';
     }
-    res.json({message:output, co:connected});
+    res.json({message: state, co: connected});
   });
 }

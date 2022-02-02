@@ -41,25 +41,20 @@ con.connect(err=>{
     throw err;
   }else{
     console.log('Connexion effectuée');
-    op = "INSERT INTO compte (name, password, mail) VALUES ('a', 're', 'paul.lecuisinier921@gmail.com')";
-    con.query(op, (err, result)=>{
-      if(err){
-        throw err;
-      }else{
-        console.log('On a inséré : ')
-        console.log(result);
-      }
+
+    app.post('/signUp', function (req, res) {
+      account.signUp(req.body.name, req.body.password, req.body.mail, con, res);
     });
 
-    con.query('SELECT * FROM compte', (err, result)=>{
-      if(err) throw err;
-      console.log(result);
-    })
-  }
-});
+    app.post('/login', function (req, res) {
+      account.login(req.body.name, req.body.password, con, res);
+    });
 
-app.post('/mailToken', function(req,res){
-  mail.sendToken(res, req.body.mail, req.body.name);
+    app.post('/mailToken', function(req,res){
+      mail.sendToken(req.body.mail, req.body.name, con, res);
+    });
+
+  }
 });
 
 app.post('/token', function(req,res){
@@ -68,14 +63,6 @@ app.post('/token', function(req,res){
 
 app.post('/resetPassword', function(req,res){
   mail.resetPassword(res, req.body.mail);
-});
-
-app.post('/signUp', function (req, res) {
-  account.signUp(req.body.name, req.body.password, req.body.mail, res);
-});
-
-app.post('/login', function (req, res) {
-  account.login(req.body.name, req.body.password, res);
 });
 
 if(app.listen(process.env.PORT || 8080)){
