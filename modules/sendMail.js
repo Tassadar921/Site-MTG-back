@@ -123,6 +123,6 @@ module.exports.checkToken = function (res, input) {
             res.json({output: 0, message: 'Token invalide'});
         }
     }
-}
+};
 
 
