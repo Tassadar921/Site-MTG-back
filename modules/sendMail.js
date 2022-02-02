@@ -1,6 +1,9 @@
 const nodemailer = require('nodemailer');
 let token = [];
 
+let message_temp;
+let output_temp;
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -66,20 +69,31 @@ module.exports.sendToken = function (res, mail, name) {
 
         transporter.sendMail(mailOptions, function (error) {
             if (error) {
-                res.json({message: 'Error: mail invalide', output: 0});
+                message_temp = 'Error: mail invalide';
+                output_temp = 0;
+                //res.json({message: 'Error: mail invalide', output: 0});
             } else {
-                res.json({message: 'Check your mails (maybe in the spams)', output: 1});
+                message_temp = 'Check your mails (maybe in the spams)';
+                output_temp = 1;
+                //res.json({message: 'Check your mails (maybe in the spams)', output: 1});
             }
         });
     }else{
         if(nexists===1){
-            res.json({message: 'Username already used', output: 0});
+            message_temp = 'Username already used';
+            output_temp = 0;
+            //res.json({message: 'Username already used', output: 0});
         }else{
             if(mexists===1){
-                res.json({message:'Email adress already used', output: 0});
+                message_temp='Email adress already used';
+                output_temp= 0;
+                //res.json({message:'Email adress already used', output: 0});
             }
         }
     }
+
+
+    res.json({message: message_temp, output: output_temp});
 }
 
 module.exports.resetPassword = function (res, mail) {
@@ -93,17 +107,24 @@ module.exports.resetPassword = function (res, mail) {
 
             transporter.sendMail(mailOptions, function (error) {
                 if (error) {
-                    res.json({message: 'Error: mail invalide', output: 0});
+                    message_temp= 'Error: mail invalide';
+                    output_temp= 0;
+                    //res.json({message: 'Error: mail invalide', output: 0});
                 } else {
-                    res.json({message: 'Check your mails (maybe in the spams)', output: 1});
+                    message_temp='Check your mails (maybe in the spams)';
+                    output_temp=1;
+                    //res.json({message: 'Check your mails (maybe in the spams)', output: 1});
                 }
             });
 
         }
         if (mailOptions.to === '') {
-            res.json({message: 'Email missing from database'})
+            message_temp='Email missing from database';
+            output_temp = 0;
+            //res.json({message: 'Email missing from database'})
         }
     }
+    res.json({message: message_temp, output: output_temp});
 }
 
 clearToken= function(mail, k){
@@ -118,11 +139,17 @@ module.exports.checkToken = function (res, input) {
     for (let i = 0; i < token.length; i++) {
         if (token[i].token == input.token) {
             clearToken(input.mail, i);
-            res.json({output: 1, message: 'Token validé'});
+            message_temp = 'Token validé';
+            output_temp= 1;
+            //res.json({output: 1, message: 'Token validé'});
         } else {
-            res.json({output: 0, message: 'Token invalide'});
+            message_temp= 'Token invalide';
+            output_temp= 0;
+            //res.json({output: 0, message: 'Token invalide'});
         }
     }
+    
+    res.json({message: message_temp, output: output_temp});
 };
 
 
