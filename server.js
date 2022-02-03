@@ -32,15 +32,24 @@ const con = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password:'',
-  database: 'test'
+  database: 'mtg'
 });
 
 con.connect(err=>{
-  let op;
   if(err){
     throw err;
   }else{
     console.log('Connexion effectuée');
+
+    let insert = 'SELECT * FROM users';
+    con.query(insert, (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        output = 'Utilisateur créé';
+        created = 1;
+      }
+    });
 
     app.post('/signUp', function (req, res) {
       account.signUp(req.body.name, req.body.password, req.body.mail, con, res);
@@ -54,15 +63,15 @@ con.connect(err=>{
       mail.sendToken(req.body.mail, req.body.name, con, res);
     });
 
+    app.post('/checkToken', function(req,res){
+      mail.checkToken(res, req.body);
+    });
+
+    app.post('/resetPassword', function(req,res){
+      mail.resetPassword(req.body.mail, con, res);
+    });
+
   }
-});
-
-app.post('/token', function(req,res){
-  mail.checkToken(res, req.body);
-});
-
-app.post('/resetPassword', function(req,res){
-  mail.resetPassword(res, req.body.mail);
 });
 
 if(app.listen(process.env.PORT || 8080)){

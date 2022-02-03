@@ -18,7 +18,6 @@ const mailOptions = {
 
 getTokenIdByMail = (mail) => {
     if (mail.length !== 0) {
-        console.log('gettokenifbymail : ', token);
         for (let i = 0; i < token.length; i++) {
             if (token[i].mail) {
                 if (token[i].mail === mail) {
@@ -52,18 +51,15 @@ module.exports.sendToken = function (mail, name, con, res) {
     let mexists = 0;
     let nexists = 0;
 
-    con.query('SELECT * FROM compte', (err, result) => {
+    con.query('SELECT * FROM users', (err, result) => {
         if (err) {
             throw err
         } else {
-            console.log('res : ', result);
-            console.log('name : ', name);
-            console.log('mail : ', mail);
             for (const line of result) {
-                if (line.name === name) {
+                if (line.username === name) {
                     nexists = 1;
                 } else {
-                    if (line.mail === mail) {
+                    if (line.email === mail) {
                         mexists = 1;
                     }
                 }
@@ -103,38 +99,36 @@ module.exports.sendToken = function (mail, name, con, res) {
     });
 }
 
-module.exports.resetPassword = function (res, mail) {
-    con.query('SELECT * FROM compte', (err, result) => {
+module.exports.resetPassword = function (mail, con, res) {
+    con.query('SELECT * FROM users', (err, result) => {
         if (err) {
             throw err
         } else {
             for (const line of result) {
-                if (line.mail === mail) {
+                if (line.email === mail) {
 
-                    mailOptions.to = line.mail;
-                    mailOptions.text = 'Here\'s your password : ' + line.password;
+                    mailOptions.to = line.email;
+                    mailOptions.text = 'Hello ' + line.username + ' your password is : ' + line.password;
                     mailOptions.subject = 'Remember your password';
 
                     transporter.sendMail(mailOptions, function (error) {
                         if (error) {
-                            res.json({message: 'Error: mail invalide', output: 0});
+                            res.json({message: 'Email invalide', output: 0});
                         } else {
                             res.json({message: 'Check your mails (maybe in the spams)', output: 1});
                         }
                     });
 
                 }
-                if (mailOptions.to === '') {
-                    res.json({message: 'Email missing from database'})
-                }
+            }
+            if (mailOptions.to === '') {
+                res.json({message: 'Email missing from database'})
             }
         }
     });
 }
 
 module.exports.checkToken = function (res, input) {
-    console.log('token serveur : ', token);
-    console.log('token input : ', input);
     for (let i = 0; i < token.length; i++) {
         if (token[i].token == input.token) {
             clearToken(input.mail, i);
