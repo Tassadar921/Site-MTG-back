@@ -1,17 +1,18 @@
 const fs = require('fs');
 const path = process.cwd()+'/data/accounts.json';
 
-module.exports.signUp= function (name, password, mail, con, res){
+module.exports.signUp= function (nom, pass, email, con, res){
   let output='';
   let created=0;
 
-  let insert = "INSERT INTO compte (name, password, mail) VALUES (name, password, mail)";
+  console.log('on essaie d\insérer : ', nom, pass, email);
+
+  let insert = "INSERT INTO compte (name, password, mail) VALUES (nom, pass, email)";
   con.query(insert, (err, result) => {
     if (err) {
       throw err;
     } else {
       console.log(result);
-      console.log('on insère :', )
       output = 'Utilisateur créé';
       created = 1;
     }
