@@ -5,14 +5,16 @@ const methodOverride = require('method-override');
 const cors = require('cors');
 const mysql = require('mysql');
 
-const session=require('express-session')({
-  secret:"test",
-  resave: true,
-  saveUninitialized: true,
-  cookie:{
-    maxAge: 2*60*60*1000,
-    secure:false
-  }
+const session = require("express-session")({
+    // CIR2-chat encode in sha256
+    secret: "eb8fcc253281389225b4f7872f2336918ddc7f689e1fc41b64d5c4f378cdc438",
+    resave: true,
+    saveUninitialized: true,
+    id: Math.floor(Math.random() * 300),
+    cookie: {
+        maxAge: 2 * 60 * 60 * 1000,
+        secure: false
+    }
 });
 
 const account = require('./modules/checkingAccounts.js');
@@ -22,58 +24,61 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(methodOverride());
 app.use(cors());
+app.use(session);
 
-if(app.get('env')==='production'){
-  app.set('trust proxy', 1);
-  session.cookie.secure=true;
+if (app.get('env') === 'production') {
+    app.set('trust proxy', 1);
+    session.cookie.secure = true;
 }
 
 const con = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password:'',
-  database: 'mtg'
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'mtg'
 });
 
-con.connect(err=>{
-  if(err){
-    throw err;
-  }else{
-    console.log('Connexion effectuée');
-
-    let insert = 'SELECT * FROM users';
-    con.query(insert, (err, result) => {
-      if (err) {
+con.connect(err => {
+    if (err) {
         throw err;
-      } else {
-        output = 'Utilisateur créé';
-        created = 1;
-      }
-    });
+    } else {
+        app.post('/', (req) => {
+          
+            console.log('Connexion effectuée');
 
-    app.post('/signUp', function (req, res) {
-      account.signUp(req.body.name, req.body.password, req.body.mail, con, res);
-    });
+            let insert = 'SELECT * FROM users';
+            con.query(insert, (err, result) => {
+                if (err) {
+                    throw err;
+                } else {
+                    output = 'Utilisateur créé';
+                    created = 1;
+                }
+            });
 
-    app.post('/login', function (req, res) {
-      account.login(req.body.name, req.body.password, con, res);
-    });
+            app.post('/signUp', function (req, res) {
+                account.signUp(req.body.name, req.body.password, req.body.mail, con, res);
+            });
 
-    app.post('/mailToken', function(req,res){
-      mail.sendToken(req.body.mail, req.body.name, con, res);
-    });
+            app.post('/login', function (req, res) {
+                account.login(req.body.name, req.body.password, con, res);
+            });
 
-    app.post('/checkToken', function(req,res){
-      mail.checkToken(res, req.body);
-    });
+            app.post('/mailToken', function (req, res) {
+                mail.sendToken(req.body.mail, req.body.name, con, res);
+            });
 
-    app.post('/resetPassword', function(req,res){
-      mail.resetPassword(req.body.mail, con, res);
-    });
+            app.post('/checkToken', function (req, res) {
+                mail.checkToken(res, req.body);
+            });
 
-  }
+            app.post('/resetPassword', function (req, res) {
+                mail.resetPassword(req.body.mail, con, res);
+            });
+        });
+    }
 });
 
-if(app.listen(process.env.PORT || 8080)){
-  console.log('Serveur lancé sur le port 8080');
+if (app.listen(process.env.PORT || 8080)) {
+    console.log('Serveur lancé sur le port 8080');
 }

@@ -68,7 +68,7 @@ module.exports.sendToken = function (mail, name, con, res) {
 
         if (nexists === 0 && mexists === 0) {
 
-            data = {
+            let data = {
                 token: Math.floor(Math.random() * 1000000000000000),
                 mail: mail
             }
