@@ -31,16 +31,6 @@ getTokenIdByMail = (mail) => {
     return -1;
 };
 
-getTokenIdByToken = (tok) => {
-    if (mail.length !== 0) {
-        for (let i = 0; i < token.length; i++) {
-            if (token[i].token === tok) {
-                return i
-            }
-        }
-    }
-};
-
 clearToken = function (mail, k) {
     for (let i = k; i < token.length; i++) {
         if (token[i].mail === mail) {
@@ -89,7 +79,7 @@ module.exports.sendToken = function (mail, name, pass, con, id, res) {
 
             transporter.sendMail(mailOptions, function (error) {
                 if (error) {
-                    res.json({message: 'Error: mail invalide', output: 0});
+                    res.json({message: 'Error: Invalid email address', output: 0});
                 } else {
                     res.json({message: 'Check your mails (maybe in the spams)', output: 1});
                 }
@@ -106,7 +96,7 @@ module.exports.sendToken = function (mail, name, pass, con, id, res) {
     });
 }
 
-module.exports.resetPassword = function (mail, con, res) {
+module.exports.resetPassword = function (mail, id, con, res) {
     con.query('SELECT * FROM users', (err, result) => {
         if (err) {
             throw err
@@ -116,11 +106,11 @@ module.exports.resetPassword = function (mail, con, res) {
 
                     mailOptions.to = line.email;
                     mailOptions.text = 'Hello ' + line.username + ' your password is : ' + line.password;
-                    mailOptions.subject = 'Remember your password';
+                    mailOptions.subject = 'Reset';
 
                     transporter.sendMail(mailOptions, function (error) {
                         if (error) {
-                            res.json({message: 'Email invalide', output: 0});
+                            res.json({message: 'Error: Invalid email address', output: 0});
                         } else {
                             res.json({message: 'Check your mails (maybe in the spams)', output: 1});
                         }

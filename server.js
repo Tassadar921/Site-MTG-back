@@ -63,7 +63,7 @@ con.connect(err => {
             });
 
             app.post('/resetPassword', function (req, res) {
-                mail.resetPassword(req.body.mail, con, res);
+                mail.resetPassword(req.body.mail, info.session.id, con, res);
             });
         });
     }
