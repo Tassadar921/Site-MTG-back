@@ -1,6 +1,6 @@
-module.exports.signUp= function (nom, pass, email, con, res){
-  let insertVar=[[nom, pass, email]];
-  let insert = 'INSERT INTO users (username, password, email) VALUES ?';
+module.exports.signUp= function (nom, pass, email, id, con, res){
+  let insertVar=[[nom, pass, email, id]];
+  let insert = 'INSERT INTO users (username, password, email, id) VALUES ?';
   con.query(insert, [insertVar], (err, result) => {
     if (err) {
       console.log(err);

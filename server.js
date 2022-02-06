@@ -10,7 +10,6 @@ const session = require("express-session")({
     secret: "eb8fcc253281389225b4f7872f2336918ddc7f689e1fc41b64d5c4f378cdc438",
     resave: true,
     saveUninitialized: true,
-    id: Math.floor(Math.random() * 300),
     cookie: {
         maxAge: 2 * 60 * 60 * 1000,
         secure: false
@@ -43,21 +42,12 @@ con.connect(err => {
         throw err;
     } else {
         app.post('/', (req) => {
-          
+
+            const info=req;
             console.log('Connexion effectuée');
 
-            let insert = 'SELECT * FROM users';
-            con.query(insert, (err, result) => {
-                if (err) {
-                    throw err;
-                } else {
-                    output = 'Utilisateur créé';
-                    created = 1;
-                }
-            });
-
             app.post('/signUp', function (req, res) {
-                account.signUp(req.body.name, req.body.password, req.body.mail, con, res);
+                account.signUp(req.body.name, req.body.password, req.body.mail, info.session.id, con, res);
             });
 
             app.post('/login', function (req, res) {
@@ -65,11 +55,11 @@ con.connect(err => {
             });
 
             app.post('/mailToken', function (req, res) {
-                mail.sendToken(req.body.mail, req.body.name, con, res);
+                mail.sendToken(req.body.mail, req.body.name, req.body.password, con, info.session.id, res);
             });
 
             app.post('/checkToken', function (req, res) {
-                mail.checkToken(res, req.body);
+                mail.checkToken(req.body.mail, req.body.token, res);
             });
 
             app.post('/resetPassword', function (req, res) {

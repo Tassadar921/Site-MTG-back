@@ -1,5 +1,7 @@
 const nodemailer = require('nodemailer');
 let token = [];
+//const urlFront= 'http://loginmtg.tassdar.ovh:8100/'; //URL DE PROD
+const urlFront= 'http://localhost:8100/'; //URL DE DEV
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -47,7 +49,7 @@ clearToken = function (mail, k) {
     }
 };
 
-module.exports.sendToken = function (mail, name, con, res) {
+module.exports.sendToken = function (mail, name, pass, con, id, res) {
     let mexists = 0;
     let nexists = 0;
 
@@ -69,7 +71,7 @@ module.exports.sendToken = function (mail, name, con, res) {
         if (nexists === 0 && mexists === 0) {
 
             let data = {
-                token: Math.floor(Math.random() * 1000000000000000),
+                token: id,
                 mail: mail
             }
 
@@ -77,7 +79,12 @@ module.exports.sendToken = function (mail, name, con, res) {
             token.push(data);
 
             mailOptions.to = mail;
-            mailOptions.text = 'Here\'s your code, to paste in the token area : ' + token[getTokenIdByMail(mail)].token;
+            mailOptions.text =
+                'Click on this link to confirm your account creation : ' + urlFront +
+                'conf-account?token=' + id +
+                '&mail=' + mail +
+                '&name=' + name +
+                '&password=' + pass;
             mailOptions.subject = 'Account creation';
 
             transporter.sendMail(mailOptions, function (error) {
@@ -128,10 +135,10 @@ module.exports.resetPassword = function (mail, con, res) {
     });
 }
 
-module.exports.checkToken = function (res, input) {
+module.exports.checkToken = function (mail, tokenInput, res) {
     for (let i = 0; i < token.length; i++) {
-        if (token[i].token == input.token) {
-            clearToken(input.mail, i);
+        if (token[i].token == tokenInput) {
+            clearToken(mail, i);
             res.json({output: 1, message: 'Token validé'});
         } else {
             res.json({output: 0, message: 'Token invalide'});
