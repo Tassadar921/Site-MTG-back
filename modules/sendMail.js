@@ -105,7 +105,11 @@ module.exports.resetPassword = function (mail, id, con, res) {
                 if (line.email === mail) {
 
                     mailOptions.to = line.email;
-                    mailOptions.text = 'Hello ' + line.username + ' your password is : ' + line.password;
+                    mailOptions.text =
+                        'Hello ' + line.username + ', here\'s the link to reset your password : ' + urlFront +
+                        'reset-password?token=' + id +
+                        '&mail=' + line.email +
+                        '&name=' + line.username;
                     mailOptions.subject = 'Reset';
 
                     transporter.sendMail(mailOptions, function (error) {
@@ -119,7 +123,7 @@ module.exports.resetPassword = function (mail, id, con, res) {
                 }
             }
             if (mailOptions.to === '') {
-                res.json({message: 'Email missing from database'})
+                res.json({message: 'Email missing from database', output: 0});
             }
         }
     });
