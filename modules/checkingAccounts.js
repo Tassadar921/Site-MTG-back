@@ -6,9 +6,6 @@ function ash(str) {
       .digest('hex');
 }
 
-
-
-
 module.exports.signUp= function (nom, pass, email, id, con, res){
   let insertVar=[[nom, ash(pass), email, id]];
   let insert = 'INSERT INTO users (username, password, email, id) VALUES ?';
@@ -21,7 +18,7 @@ module.exports.signUp= function (nom, pass, email, id, con, res){
   });
 };
 
-module.exports.login= function (name, password, con, res){
+module.exports.login= function (name, password, req, con, res){
   let state='';
   let exists=false;
   let connected=false;
@@ -29,15 +26,18 @@ module.exports.login= function (name, password, con, res){
     if(err){
       throw err;
     }else{
-      for(const line of result) {
-        if((line.username===name || line.email===name) && line.password===ash(password)){
+      for(let i=0; i<result.length; i++) {
+        if((result[i].username===name || result[i].email===name) && result[i].password===ash(password)){
           exists=true;
           connected=true;
           state='Connected';
+          req.session.username=result[i].username;
+          i=result.length;
         }else{
-          if((line.username===name || line.email===name) && line.password!==ash(password)){
+          if((result[i].username===name || result[i].email===name) && result[i].password!==ash(password)){
             state='Password incorrect';
             exists=true;
+            i=result.length;
           }
         }
       }
