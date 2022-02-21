@@ -6,7 +6,6 @@ const cors = require('cors');
 const mysql = require('mysql');
 
 const session = require("express-session")({
-    // CIR2-chat encode in sha256
     secret: "eb8fcc253281389225b4f7872f2336918ddc7f689e1fc41b64d5c4f378cdc438",
     resave: true,
     saveUninitialized: true,
@@ -74,6 +73,18 @@ function preventDisconnect() {
 
                 app.post('/login', function (req, res) {
                     account.login(req.body.name, req.body.password, req, con, res);
+                });
+
+                app.post('/getUsers', function (req, res) {
+                    account.getUserList(con, res);
+                });
+
+                app.post('/lastConnected', function (req, res) {
+                    account.lastConnected(req.body.name, con);
+                });
+
+                app.post('/test', function (req, res) {
+                    console.log('test');
                 });
             });
         }
