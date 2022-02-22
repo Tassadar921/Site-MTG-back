@@ -117,3 +117,21 @@ module.exports.lastConnected = function (name, con){
   date += hour;
   con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date], (err, result) => {});
 }
+
+module.exports.addFriend = function (user, adding, con){
+  let friends =[];
+  con.query('SELECT * FROM users', (err, result) => {
+    if (err){
+      throw err;
+    }else{
+      for(let i=0;i<result.length;i++){
+        if(result[i].username===user){
+          friends=result[i].friends;
+          friends.unshift(adding);
+          i=result.length;
+        }
+      }
+      con.query('UPDATE users SET friends =\'' + friends +'\' WHERE username = \''+ user + '\'', (err, result) => {});
+    }
+  });
+}

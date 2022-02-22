@@ -83,6 +83,10 @@ function preventDisconnect() {
                     account.lastConnected(req.body.name, con);
                 });
 
+                app.post('/addFriend', function(req,res){
+                    account.addFriend(req.body.user, req.body.adding, con);
+                });
+
                 app.post('/test', function (req, res) {
                     console.log('test');
                 });
