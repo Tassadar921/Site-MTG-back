@@ -56,6 +56,7 @@ function preventDisconnect() {
                 });
 
                 app.post('/getUserIdByUsername', function (req, res) {
+                    console.log('bouh');
                     account.getUserIdByUsername(req.body.name, con, res);
                 });
 
@@ -84,7 +85,7 @@ function preventDisconnect() {
                 });
 
                 app.post('/addFriend', function(req,res){
-                    account.addFriend(req.body.user, req.body.adding, con);
+                    account.addFriend(req.body.user, req.body.adding, con, res);
                 });
 
                 app.post('/test', function (req, res) {

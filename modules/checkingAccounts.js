@@ -8,11 +8,9 @@ function ash(str) {
 }
 
 module.exports.signUp= function (nom, pass, email, id, con, res){
-  let insertVar=[[nom, ash(pass), email, id]];
-  let insert = 'INSERT INTO users (username, password, email, id) VALUES ?';
-  con.query(insert, [insertVar], (err, result) => {
+  con.query('INSERT INTO users (username, password, email, id) VALUES ?', [nom, ash(pass), email, id], (err, result) => {
     if (err) {
-      console.log(err);
+      throw err;
     } else {
       res.json({message: 'Account created', return: true});
     }
@@ -23,22 +21,20 @@ module.exports.login= function (name, password, req, con, res){
   let state='';
   let exists=false;
   let connected=false;
-  con.query('SELECT * FROM users', (err, result)=>{
+  con.query('SELECT password FROM users WHERE username = ? OR email = ?', [name, name],(err, result)=>{
     if(err){
       throw err;
     }else{
-      for(let i=0; i<result.length; i++) {
-        if((result[i].username===name || result[i].email===name) && result[i].password===ash(password)){
+      if(result.length){
+        if(result[0].password===ash(password)){
           exists=true;
           connected=true;
           state='Connected';
-          req.session.username=result[i].username;
-          i=result.length;
+          req.session.username=name;
         }else{
-          if((result[i].username===name || result[i].email===name) && result[i].password!==ash(password)){
+          if(result[0].password!==ash(password)){
             state='Password incorrect';
             exists=true;
-            i=result.length;
           }
         }
       }
@@ -50,10 +46,11 @@ module.exports.login= function (name, password, req, con, res){
   });
 }
 
-module.exports.resetPassword=async function(id, password, con, res){
+module.exports.resetPassword=function(uuid, password, con, res){
+  console.log(uuid);
+  console.log(password);
 
-      const sql = "UPDATE users SET password = ? WHERE id = \'" + id + "\'";
-      await con.query(sql, [ash(password)], (err, result) => {
+      con.query('UPDATE users SET password = ? WHERE id = ?', [ash(password), uuid], (err, result) => {
         if(err){
           throw err;
         }else{
@@ -63,24 +60,23 @@ module.exports.resetPassword=async function(id, password, con, res){
 }
 
 module.exports.getUserIdByUsername = function (name, con, res) {
-  con.query('SELECT * FROM users', (err, result) => {
+  con.query('SELECT id FROM users WHERE username = ?',[name], (err, result) => {
     if (err) {
       throw err;
     } else {
-      for (let line of result) {
-        if (line.username === name) {
-          res.json({id: line.id});
-          break;
+      console.log(result);
+        if(result.length) {
+          res.json({message: 'ID caught', id: result[0].id});
+        }else {
+          res.json({message: 'Something went wrong : retry'});
         }
-        res.json({message: 'Il y a un problème dans l\'url : veuillez recommencer le processus'});
       }
-    }
   });
 }
 
 module.exports.getUserList = function (con, res) {
   const tab = [];
-  con.query('SELECT * FROM users', (err, result) => {
+  con.query('SELECT username, lastConnected FROM users', (err, result) => {
     if (err){
       throw err;
     }else{
@@ -118,20 +114,18 @@ module.exports.lastConnected = function (name, con){
   con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date], (err, result) => {});
 }
 
-module.exports.addFriend = function (user, adding, con){
-  let friends =[];
-  con.query('SELECT * FROM users', (err, result) => {
-    if (err){
+module.exports.addFriend = function (user, adding, con, res) {
+  con.query('SELECT user1, user2 FROM userfriends WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?)', [user, adding, adding, user], (err, re) => {
+    if (err) {
       throw err;
-    }else{
-      for(let i=0;i<result.length;i++){
-        if(result[i].username===user){
-          friends=result[i].friends;
-          friends.unshift(adding);
-          i=result.length;
-        }
+    } else {
+      if(!re) {
+        con.query("INSERT INTO userfriends (user1, user2) VALUES " + "(\'" + user + "\', \'" + adding + "\')", (e, r) => {
+          if (e) {
+            throw e;
+          }
+        });
       }
-      con.query('UPDATE users SET friends =\'' + friends +'\' WHERE username = \''+ user + '\'', (err, result) => {});
     }
   });
 }
