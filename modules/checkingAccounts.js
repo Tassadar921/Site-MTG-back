@@ -74,13 +74,14 @@ module.exports.getUserIdByUsername = function (name, con, res) {
   });
 }
 
-module.exports.getUserList = function (con, res) {
+module.exports.getUserListExceptOne = function (name, con, res) {
   const tab = [];
-  con.query('SELECT username, lastConnected FROM users', (err, result) => {
+  con.query('SELECT username, lastConnected FROM users WHERE username != ?', [name], (err, result) => {
     if (err){
       throw err;
     }else{
       for(let line of result){
+        console.log('list : ', result);
         tab.unshift({username: line.username, lastConnected: line.lastConnected});
       }
       res.json({output: tab});

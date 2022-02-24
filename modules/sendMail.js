@@ -96,35 +96,36 @@ module.exports.sendToken = function (mail, name, pass, con, id, res) {
     });
 }
 
-module.exports.resetPassword = function (mail, id, con, res) {
-    con.query('SELECT * FROM users', (err, result) => {
+module.exports.resetPassword = function (mail, token, con, res) {
+    console.log(mail);
+    console.log(token);
+    con.query("SELECT username, email FROM users WHERE email = ?", [mail], (err, result) => {
         if (err) {
             throw err
         } else {
-            for (const line of result) {
-                if (line.email === mail) {
+            console.log(result);
+            mailOptions.to = result[0].email;
+            mailOptions.text =
+                'Hello ' + result[0].username + ', here\'s the link to reset your password : ' + urlFront +
+                'reset-password?' +
+                'token=' + token +
+                '&mail=' + result[0].email +
+                '&name=' + result[0].username;
+            mailOptions.subject = 'Reset';
 
-                    mailOptions.to = line.email;
-                    mailOptions.text =
-                        'Hello ' + line.username + ', here\'s the link to reset your password : ' + urlFront +
-                        'reset-password?token=' + id +
-                        '&mail=' + line.email +
-                        '&name=' + line.username;
-                    mailOptions.subject = 'Reset';
-
-                    transporter.sendMail(mailOptions, function (error) {
-                        if (error) {
-                            res.json({message: 'Error: Invalid email address', output: 0});
-                        } else {
-                            res.json({message: 'Check your mails (maybe in the spams)', output: 1});
-                        }
-                    });
-
+            transporter.sendMail(mailOptions, function (error) {
+                console.log(mailOptions);
+                if (error) {
+                    res.json({message: 'Error: Invalid email address', output: 0});
+                } else {
+                    console.log(mailOptions);
+                    res.json({message: 'Check your mails (maybe in the spams)', output: 1});
                 }
-            }
-            if (mailOptions.to === '') {
-                res.json({message: 'Email missing from database', output: 0});
-            }
+            });
+
+        }
+        if (mailOptions.to === '') {
+            res.json({message: 'Email missing from database', output: 0});
         }
     });
 }

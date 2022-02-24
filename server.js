@@ -76,8 +76,8 @@ function preventDisconnect() {
                     account.login(req.body.name, req.body.password, req, con, res);
                 });
 
-                app.post('/getUsers', function (req, res) {
-                    account.getUserList(con, res);
+                app.post('/getUserListExceptOne', function (req, res) {
+                    account.getUserListExceptOne(req.body.name, con, res);
                 });
 
                 app.post('/lastConnected', function (req, res) {
