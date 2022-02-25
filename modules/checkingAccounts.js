@@ -46,17 +46,14 @@ module.exports.login= function (name, password, req, con, res){
   });
 }
 
-module.exports.resetPassword=function(uuid, password, con, res){
-  console.log(uuid);
-  console.log(password);
-
-      con.query('UPDATE users SET password = ? WHERE id = ?', [ash(password), uuid], (err, result) => {
-        if(err){
-          throw err;
-        }else{
-          res.json({message: 'Password successfully replaced', output:1});
-        }
-      });
+module.exports.resetPassword = function (uuid, password, con, res) {
+  con.query('UPDATE users SET password = ? WHERE id = ?', [ash(password), uuid], (err, result) => {
+    if (err) {
+      throw err;
+    } else {
+      res.json({message: 'Password successfully replaced', output: 1});
+    }
+  });
 }
 
 module.exports.getUserIdByUsername = function (name, con, res) {
@@ -112,7 +109,7 @@ module.exports.lastConnected = function (name, con){
         .slice(0, moment().format('h:mm:ss a').length-6);
   }
   date += hour;
-  con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date], (err, result) => {});
+  con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date]);
 }
 
 module.exports.addFriend = function (user, adding, con, res) {
@@ -121,11 +118,7 @@ module.exports.addFriend = function (user, adding, con, res) {
       throw err;
     } else {
       if(!re) {
-        con.query("INSERT INTO userfriends (user1, user2) VALUES " + "(\'" + user + "\', \'" + adding + "\')", (e, r) => {
-          if (e) {
-            throw e;
-          }
-        });
+        con.query("INSERT INTO userfriends (user1, user2) VALUES " + "(\'" + user + "\', \'" + adding + "\')");
       }
     }
   });
