@@ -42,62 +42,75 @@ function preventDisconnect() {
             console.log('error when connecting to db:', err);
             setTimeout(preventDisconnect, 5000);
         } else {
-            app.post('/', (req) => {
+            console.log('Connexion effectuée');
 
-                const info = req;
-                console.log('Connexion effectuée');
+            app.post('/signUp', function (req, res) {
+                account.signUp(req.body.name, req.body.password, req.body.mail, req.session.id, con, res);
+            });
 
-                app.post('/signUp', function (req, res) {
-                    account.signUp(req.body.name, req.body.password, req.body.mail, info.session.id, con, res);
-                });
+            app.post('/resetPassword', function (req, res) {
+                account.resetPassword(req.body.id, req.body.password, con, res);
+            });
 
-                app.post('/resetPassword', function (req, res) {
-                    account.resetPassword(req.body.id, req.body.password, con, res);
-                });
+            app.post('/getUserIdByUsername', function (req, res) {
+                console.log('bouh');
+                account.getUserIdByUsername(req.body.name, con, res);
+            });
 
-                app.post('/getUserIdByUsername', function (req, res) {
-                    console.log('bouh');
-                    account.getUserIdByUsername(req.body.name, con, res);
-                });
+            app.post('/mailToken', function (req, res) {
+                mail.sendToken(req.body.mail, req.body.name, req.body.password, con, req.session.id, res);
+            });
 
-                app.post('/mailToken', function (req, res) {
-                    mail.sendToken(req.body.mail, req.body.name, req.body.password, con, info.session.id, res);
-                });
+            app.post('/checkToken', function (req, res) {
+                mail.checkToken(req.body.mail, req.body.token, res);
+            });
 
-                app.post('/checkToken', function (req, res) {
-                    mail.checkToken(req.body.mail, req.body.token, res);
-                });
+            app.post('/sendResetPassword', function (req, res) {
+                mail.resetPassword(req.body.mail, req.session.id, con, res);
+            });
 
-                app.post('/sendResetPassword', function (req, res) {
-                    mail.resetPassword(req.body.mail, info.session.id, con, res);
-                });
+            app.post('/login', function (req, res) {
+                account.login(req.body.name, req.body.password, req, con, res);
+            });
 
-                app.post('/login', function (req, res) {
-                    account.login(req.body.name, req.body.password, req, con, res);
-                });
+            app.post('/getUserListExceptOne', function (req, res) {
+                account.getUserListExceptOne(req.body.name, con, res);
+            });
 
-                app.post('/getUserListExceptOne', function (req, res) {
-                    account.getUserListExceptOne(req.body.name, con, res);
-                });
+            app.post('/lastConnected', function (req, res) {
+                account.lastConnected(req.body.name, con, res);
+            });
 
-                app.post('/lastConnected', function (req, res) {
-                    account.lastConnected(req.body.name, con);
-                });
+            app.post('/addFriend', function (req, res) {
+                account.addFriend(req.body.user1, req.body.user2, con, res);
+            });
 
-                app.post('/addFriend', function(req,res){
-                    account.addFriend(req.body.user, req.body.adding, con, res);
-                });
+            app.post('/getUserFriends', function (req, res) {
+                account.getUserFriends(req.body.name, con, res);
+            });
 
-                app.post('/test', function (req, res) {
-                    console.log('test');
-                });
+            app.post('/askFriend', function (req, res) {
+                account.askFriend(req.body.from, req.body.to, con, res);
+            });
+
+            app.post('/getUserDemandsSent', function (req, res) {
+                account.getUserDemandsSent(req.body.name, con, res);
+            });
+
+            app.post('/getUserDemandsReceived', function (req, res) {
+                account.getUserDemandsReceived(req.body.name, con, res);
+            });
+
+            app.post('/test', function (req, res) {
+                console.log('test');
+                res.json({message: 'ok'});
             });
         }
     });
 
-    con.on('error', function(err) {
+    con.on('error', function (err) {
         console.log('db error', err);
-        if(err.code === 'PROTOCOL_CONNECTION_LOST') {
+        if (err.code === 'PROTOCOL_CONNECTION_LOST') {
             preventDisconnect();
         } else {
             throw err;

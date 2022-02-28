@@ -97,13 +97,10 @@ module.exports.sendToken = function (mail, name, pass, con, id, res) {
 }
 
 module.exports.resetPassword = function (mail, token, con, res) {
-    console.log(mail);
-    console.log(token);
     con.query("SELECT username, email FROM users WHERE email = ?", [mail], (err, result) => {
         if (err) {
             throw err
         } else {
-            console.log(result);
             mailOptions.to = result[0].email;
             mailOptions.text =
                 'Hello ' + result[0].username + ', here\'s the link to reset your password : ' + urlFront +
@@ -114,11 +111,9 @@ module.exports.resetPassword = function (mail, token, con, res) {
             mailOptions.subject = 'Reset';
 
             transporter.sendMail(mailOptions, function (error) {
-                console.log(mailOptions);
                 if (error) {
                     res.json({message: 'Error: Invalid email address', output: 0});
                 } else {
-                    console.log(mailOptions);
                     res.json({message: 'Check your mails (maybe in the spams)', output: 1});
                 }
             });

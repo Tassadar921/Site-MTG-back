@@ -61,7 +61,6 @@ module.exports.getUserIdByUsername = function (name, con, res) {
     if (err) {
       throw err;
     } else {
-      console.log(result);
         if(result.length) {
           res.json({message: 'ID caught', id: result[0].id});
         }else {
@@ -78,7 +77,6 @@ module.exports.getUserListExceptOne = function (name, con, res) {
       throw err;
     }else{
       for(let line of result){
-        console.log('list : ', result);
         tab.unshift({username: line.username, lastConnected: line.lastConnected});
       }
       res.json({output: tab});
@@ -86,7 +84,7 @@ module.exports.getUserListExceptOne = function (name, con, res) {
   });
 }
 
-module.exports.lastConnected = function (name, con){
+module.exports.lastConnected = function (name, con, res){
   let date = new Date().toLocaleDateString('fr') + ' à ';
   let hour;
   if(moment().format('h:mm:ss a').includes('pm')){
@@ -109,17 +107,99 @@ module.exports.lastConnected = function (name, con){
         .slice(0, moment().format('h:mm:ss a').length-6);
   }
   date += hour;
-  con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date]);
+  con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date], (err, result) => {
+    if(err){
+      throw err;
+    }else{
+      res.json({message: 'ok'});
+    }
+  });
 }
 
-module.exports.addFriend = function (user, adding, con, res) {
-  con.query('SELECT user1, user2 FROM userfriends WHERE (user1 = ? AND user2 = ?) OR (user1 = ? AND user2 = ?)', [user, adding, adding, user], (err, re) => {
+module.exports.addFriend = async function (user, adding, con, res) {
+  let tab = [user, adding];
+  tab.sort();
+  await con.query('SELECT user1, user2 FROM userfriends WHERE user1 = ? AND user2 = ?', [tab[0], tab[1]], (err, result) => {
     if (err) {
       throw err;
     } else {
-      if(!re) {
-        con.query("INSERT INTO userfriends (user1, user2) VALUES " + "(\'" + user + "\', \'" + adding + "\')");
+      if(!result.length) {
+        con.query("INSERT INTO userfriends (user1, user2) VALUES " + "(\'" + tab[0] + "\', \'" + tab[1] + "\')", (e, re) => {
+          if (e) {
+            throw e;
+          }else{
+            res.json({message: 'Friend added'});
+          }
+        });
+      }else{
+        res.json({message: 'Already friends'})
       }
     }
+  });
+}
+
+module.exports.getUserFriends = function (user, con, res) {
+  let tab = [];
+  con.query('SELECT user1, user2 FROM userfriends WHERE user1 = ? OR user2 = ?', [user, user], (err, re) =>{
+    if(err){
+      throw err;
+    }else{
+      for(let line of re){
+        if(line.user1===user){
+          tab.unshift(line.user2);
+        }else{
+          tab.unshift(line.user1);
+        }
+      }
+    }
+    res.json({links: tab});
+  });
+}
+
+module.exports.askFriend = function (from, to, con, res){
+  con.query('SELECT sender FROM askingfriends WHERE sender = ? AND receiver = ?', [from, to], (e, r) =>{
+    if(e){
+      throw e;
+    }else{
+      if(r.length){
+        res.json({message: 'Demand already sent'});
+      }else{
+        con.query("INSERT INTO askingfriends (sender, receiver) VALUES " + "(\'" + from + "\', \'" + to + "\')", (err, resp) => {
+          if (err) {
+            throw err;
+          }else{
+            res.json({message: 'Demand submitted'});
+          }
+        });
+      }
+    }
+  });
+}
+
+module.exports.getUserDemandsSent = function (username, con, res) {
+  let tab = [];
+  con.query("SELECT receiver FROM askingfriends WHERE sender = ?", [username] , (err, result) => {
+    if(err){
+      throw err;
+    }else{
+      for(let line of result){
+        tab.unshift(line.sender);
+      }
+    }
+    res.json({demands: tab});
+  });
+}
+
+module.exports.getUserDemandsReceived = function (username, con, res) {
+  let tab = [];
+  con.query("SELECT sender FROM askingfriends WHERE receiver = ?", [username] , (err, result) => {
+    if(err){
+      throw err;
+    }else{
+      for(let line of result){
+        tab.unshift(line.sender);
+      }
+    }
+    res.json({demands: tab});
   });
 }
