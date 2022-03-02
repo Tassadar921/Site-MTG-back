@@ -87,24 +87,23 @@ module.exports.getUserListExceptOne = function (name, con, res) {
 module.exports.lastConnected = function (name, con, res){
   let date = new Date().toLocaleDateString('fr') + ' à ';
   let hour;
-  if(moment().format('h:mm:ss a').includes('pm')){
+  if (moment().format('h:mm:ss a').includes('pm')) {
     let cut;
-    for(let i = 0; i<moment().format('h:mm:ss a').length;i++){
-      if(moment().format('h:mm:ss a')[i]===':'){
+    for (let i = 0; i < moment().format('h:mm:ss a').length; i++) {
+      if (moment().format('h:mm:ss a')[i] === ':') {
         cut = i;
-        i=moment().format('h:mm:ss a').length;
+        i = moment().format('h:mm:ss a').length;
       }
     }
-    if(moment().format('h:mm:ss a')[0]==='1' && moment().format('h:mm:ss a')[1]==='2'){
-      hour = ('0' + moment().format('h:mm:ss a').slice(cut, moment().format('h:mm:ss a').length-6));
-    }else{
-      hour = (Number(moment().format('h:mm:ss a').slice(0,cut))+12)
-          .toString()+moment().format('h:mm:ss a')
-          .slice(cut, moment().format('h:mm:ss a').length-6);
+    hour = (Number(moment().format('h:mm:ss a').slice(0, cut)) + 12)
+        .toString() + moment().format('h:mm:ss a')
+        .slice(cut, moment().format('h:mm:ss a').length - 6);
+    if(hour[0]==='2' && hour[1]==='4'){
+      hour = '12' + hour.slice(2,this.hour.length);
     }
-  }else{
+  } else {
     hour = moment().format('h:mm:ss a')
-        .slice(0, moment().format('h:mm:ss a').length-6);
+        .slice(0, moment().format('h:mm:ss a').length - 6);
   }
   date += hour;
   con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date], (err, result) => {
@@ -201,5 +200,18 @@ module.exports.getUserDemandsReceived = function (username, con, res) {
       }
     }
     res.json({demands: tab});
+  });
+}
+
+module.exports.deleteFriendship = function (username1, username2, con, res){
+  let tab = [username1, username2];
+  tab.sort();
+  console.log(tab);
+  con.query("DELETE FROM userfriends WHERE user1 = ? AND user2 = ?", [tab[0], tab[1]], (err, result) => {
+    if(err){
+      throw err;
+    }else{
+      res.json({output: 'Supprimé'});
+    }
   });
 }
