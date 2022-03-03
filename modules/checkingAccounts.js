@@ -85,7 +85,7 @@ module.exports.getUserListExceptOne = function (name, con, res) {
 }
 
 module.exports.lastConnected = function (name, con, res){
-  let date = new Date().toLocaleDateString('fr') + ' à ';
+  let date = new Date().toLocaleDateString('fr') + ' at ';
   let hour;
   if (moment().format('h:mm:ss a').includes('pm')) {
     let cut;
@@ -99,7 +99,7 @@ module.exports.lastConnected = function (name, con, res){
         .toString() + moment().format('h:mm:ss a')
         .slice(cut, moment().format('h:mm:ss a').length - 6);
     if(hour[0]==='2' && hour[1]==='4'){
-      hour = '12' + hour.slice(2,this.hour.length);
+      hour = '12' + hour.slice(2,hour.length);
     }
   } else {
     hour = moment().format('h:mm:ss a')
@@ -206,12 +206,21 @@ module.exports.getUserDemandsReceived = function (username, con, res) {
 module.exports.deleteFriendship = function (username1, username2, con, res){
   let tab = [username1, username2];
   tab.sort();
-  console.log(tab);
   con.query("DELETE FROM userfriends WHERE user1 = ? AND user2 = ?", [tab[0], tab[1]], (err, result) => {
     if(err){
       throw err;
     }else{
       res.json({output: 'Supprimé'});
+    }
+  });
+}
+
+module.exports.deleteDemandReceived = function (send, receive, con, res){
+  con.query("DELETE FROM askingfriends WHERE sender = ? AND receiver = ?", [send, receive], (err, result) => {
+    if(err){
+      throw err;
+    }else{
+      res.json({message: 'Demande supprimée'});
     }
   });
 }

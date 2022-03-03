@@ -105,6 +105,10 @@ function preventDisconnect() {
                 account.deleteFriendship(req.body.username1, req.body.username2, con, res);
             });
 
+            app.post('/deleteDemandReceived', function (req, res) {
+                account.deleteDemandReceived(req.body.sender, req.body.receiver, con, res);
+            });
+
             app.post('/test', function (req, res) {
                 console.log('test');
                 res.json({message: 'ok'});
