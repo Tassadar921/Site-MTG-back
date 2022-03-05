@@ -72,7 +72,7 @@ module.exports.getUserIdByUsername = function (name, con, res) {
 
 module.exports.getUserListExceptOne = function (name, con, res) {
   const tab = [];
-  con.query('SELECT username, lastConnected FROM users WHERE username != ?', [name], (err, result) => {
+  con.query('SELECT username, lastConnected FROM users WHERE username != ? ORDER BY username DESC', [name], (err, result) => {
     if (err){
       throw err;
     }else{
@@ -151,7 +151,7 @@ module.exports.getUserFriends = function (user, con, res) {
         }
       }
     }
-    res.json({links: tab});
+    res.json({links: tab.sort()});
   });
 }
 
@@ -177,12 +177,12 @@ module.exports.askFriend = function (from, to, con, res){
 
 module.exports.getUserDemandsSent = function (username, con, res) {
   let tab = [];
-  con.query("SELECT receiver FROM askingfriends WHERE sender = ?", [username] , (err, result) => {
+  con.query("SELECT receiver FROM askingfriends WHERE sender = ? ORDER BY receiver DESC", [username] , (err, result) => {
     if(err){
       throw err;
     }else{
       for(let line of result){
-        tab.unshift(line.sender);
+        tab.unshift(line.receiver);
       }
     }
     res.json({demands: tab});
@@ -191,7 +191,7 @@ module.exports.getUserDemandsSent = function (username, con, res) {
 
 module.exports.getUserDemandsReceived = function (username, con, res) {
   let tab = [];
-  con.query("SELECT sender FROM askingfriends WHERE receiver = ?", [username] , (err, result) => {
+  con.query("SELECT sender FROM askingfriends WHERE receiver = ? ORDER BY sender DESC", [username] , (err, result) => {
     if(err){
       throw err;
     }else{
@@ -215,7 +215,7 @@ module.exports.deleteFriendship = function (username1, username2, con, res){
   });
 }
 
-module.exports.deleteDemandReceived = function (send, receive, con, res){
+module.exports.deleteDemand = function (send, receive, con, res){
   con.query("DELETE FROM askingfriends WHERE sender = ? AND receiver = ?", [send, receive], (err, result) => {
     if(err){
       throw err;
