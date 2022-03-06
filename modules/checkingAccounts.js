@@ -102,8 +102,10 @@ module.exports.lastConnected = function (name, con, res){
       hour = '12' + hour.slice(2,hour.length);
     }
   } else {
-    hour = moment().format('h:mm:ss a')
-        .slice(0, moment().format('h:mm:ss a').length - 6);
+    hour = moment().format('h:mm:ss a').slice(0, moment().format('h:mm:ss a').length - 6);
+    if(hour[0]==='1' && hour[1]==='2'){
+      hour = '00' + hour.slice(2,hour.length);
+    }
   }
   date += hour;
   con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date], (err, result) => {
