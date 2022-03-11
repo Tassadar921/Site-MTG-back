@@ -110,8 +110,7 @@ function preventDisconnect() {
             });
 
             app.post('/test', function (req, res) {
-                console.log('test');
-                res.json({message: 'ok'});
+                res.json({file: req.body.file});
             });
         }
     });
