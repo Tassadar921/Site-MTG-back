@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const moment = require('moment');
+const hour = require ('./shared/getHour');
 
 function ash(str) {
   return crypto.createHash('sha256')
@@ -8,10 +8,6 @@ function ash(str) {
 }
 
 module.exports.signUp= function (name, pass, email, id, con, res){
-  console.log('name : ', name);
-  console.log('ash pass : ', ash(pass));
-  console.log('email : ', email);
-  console.log('id : ', id);
   con.query("INSERT INTO users (username, password, email, id) VALUES " + "(\'" + name + "\', \'" + ash(pass)+ "\', \'" + email + "\', \'" + id + "\')", (err, result) => {
     if (err) {
       throw err;
@@ -89,29 +85,7 @@ module.exports.getUserListExceptOne = function (name, con, res) {
 }
 
 module.exports.lastConnected = function (name, con, res){
-  let date = new Date().toLocaleDateString('fr') + ' at ';
-  let hour;
-  if (moment().format('h:mm:ss a').includes('pm')) {
-    let cut;
-    for (let i = 0; i < moment().format('h:mm:ss a').length; i++) {
-      if (moment().format('h:mm:ss a')[i] === ':') {
-        cut = i;
-        i = moment().format('h:mm:ss a').length;
-      }
-    }
-    hour = (Number(moment().format('h:mm:ss a').slice(0, cut)) + 12)
-        .toString() + moment().format('h:mm:ss a')
-        .slice(cut, moment().format('h:mm:ss a').length - 6);
-    if(hour[0]==='2' && hour[1]==='4'){
-      hour = '12' + hour.slice(2,hour.length);
-    }
-  } else {
-    hour = moment().format('h:mm:ss a').slice(0, moment().format('h:mm:ss a').length - 6);
-    if(hour[0]==='1' && hour[1]==='2'){
-      hour = '00' + hour.slice(2,hour.length);
-    }
-  }
-  date += hour;
+  const date = hour.getHour();
   con.query('UPDATE users SET lastConnected = ? WHERE username = \''+ name + '\'', [date], (err, result) => {
     if(err){
       throw err;

@@ -17,6 +17,7 @@ const session = require("express-session")({
 
 const account = require('./modules/checkingAccounts.js');
 const mail = require('./modules/sendMail');
+const deck = require ('./modules/decks&SQL');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -53,7 +54,6 @@ function preventDisconnect() {
             });
 
             app.post('/getUserIdByUsername', function (req, res) {
-                console.log('bouh');
                 account.getUserIdByUsername(req.body.name, con, res);
             });
 
@@ -106,11 +106,19 @@ function preventDisconnect() {
             });
 
             app.post('/deleteDemand', function (req, res) {
-                account.deleteDemand(req.body.sender, req.body.receiver, con, res);
+                account.deleteDemand(req.body.name, req.body.owner, req.body.list, req.body.public, con, res);
             });
 
-            app.post('/test', function (req, res) {
-                //action
+            app.post('/uploadDeck', function (req, res) {
+                deck.uploadDeck(req.body.name, req.body.owner, req.body.list , req.body.public, con, res);
+            });
+
+            app.post('/getUserDecks', function (req, res) {
+                deck.getUserDecks(req.body.username, con, res);
+            });
+
+            app.post('/deleteDeck', function (req, res) {
+                deck.deleteDeck(req.body.username, req.body.name, con, res);
             });
         }
     });
