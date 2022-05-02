@@ -14,13 +14,36 @@ module.exports.uploadDeck = function (deckName, username, deckList, forEveryone,
                         bool = 1;
                     }
 
-                    con.query("INSERT INTO decks (name, owner, public, list, lastUpdated, whoModifiedLast) VALUES ?", (deckName, username, bool, deckListString, hour, username), (err) => {
-                        if (err) {
-                            throw err;
-                        } else {
-                            res.json({message: 'Deck saved'});
-                        }
-                    });
+                    console.log('deckname : ', deckName);
+                    console.log('owner : ', username);
+                    console.log('public : ', bool);
+                    console.log('lastUpdated : ', hour);
+                    console.log('whoModifiedLast : ', username);
+                    // console.log('deckname : ', deckName);
+
+                    // con.query("INSERT INTO decks (name, owner, public, list, lastUpdated, whoModifiedLast) VALUES?",
+                    //     (deckName, username, bool, deckListString, hour, username), (err) => {
+                    //     if (err) {
+                    //         throw err;
+                    //     } else {
+                    //         res.json({message: 'Deck saved'});
+                    //     }
+                    // });
+
+                    con.query("INSERT INTO decks (name, owner, public, list, lastUpdated, whoModifiedLast) VALUES (\'" +
+                            deckName + "\',\'" +
+                            username + "\',\'" +
+                            bool + "\',\'" +
+                            deckListString + "\',\'" +
+                            hour + "\',\'" +
+                            username + "\')"
+                        , (err) => {
+                            if (err) {
+                                throw err;
+                            } else {
+                                res.json({message: 'Deck saved'});
+                            }
+                        });
                 } else {
                     res.json({message: 'You already own a deck named like that'});
                 }
