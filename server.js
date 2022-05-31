@@ -120,6 +120,14 @@ function preventDisconnect() {
             app.post('/deleteDeck', function (req, res) {
                 deck.deleteDeck(req.body.username, req.body.name, con, res);
             });
+
+            app.post('/shareDeckWith', function (req, res) {
+                deck.shareWith(req.body.name, req.body.username, req.body.with, con, res);
+            });
+
+            app.post('/getListSharedWith', function (req, res) {
+                deck.getListSharedWith(req.body.name, req.body.username, con, res);
+            });
         }
     });
 

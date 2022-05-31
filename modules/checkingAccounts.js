@@ -1,14 +1,12 @@
 const crypto = require('crypto');
 const hour = require ('./shared/getHour');
 
-function ash(str) {
-  return crypto.createHash('sha256')
-      .update(str, 'utf-8')
-      .digest('hex');
-}
+const ash = (str) => crypto.createHash('sha256')
+    .update(str, 'utf-8')
+    .digest('hex');
 
 module.exports.signUp= function (name, pass, email, id, con, res){
-  con.query("INSERT INTO users (username, password, email, id) VALUES " + "(\'" + name + "\', \'" + ash(pass)+ "\', \'" + email + "\', \'" + id + "\')", (err, result) => {
+  con.query('INSERT INTO users (username, password, email, id) VALUES (?,?,?,?)', [name, ash(pass), email, id], (err) => {
     if (err) {
       throw err;
     } else {
