@@ -184,11 +184,11 @@ module.exports.getUserDemandsReceived = function (username, con, res) {
 module.exports.deleteFriendship = function (username1, username2, con, res){
   let tab = [username1, username2];
   tab.sort();
-  con.query("DELETE FROM userfriends WHERE user1 = ? AND user2 = ?", [tab[0], tab[1]], (err, result) => {
+  con.query("DELETE FROM userfriends WHERE user1 = ? AND user2 = ?", [tab[0], tab[1]], (err) => {
     if(err){
       throw err;
     }else{
-      res.json({output: 'Supprimé'});
+      res.json({output: username1 + ' deleted from friends'});
     }
   });
 }
