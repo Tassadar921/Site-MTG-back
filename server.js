@@ -110,11 +110,11 @@ function preventDisconnect() {
             });
 
             app.post('/uploadDeck', function (req, res) {
-                deck.uploadDeck(req.body.name, req.body.owner, req.body.list , req.body.public, con, res);
+                deck.uploadDeck(req.body.name, req.body.owner, req.body.list , req.body.public, req.body.colors, con, res);
             });
 
             app.post('/getUserDecks', function (req, res) {
-                deck.getUserDecks(req.body.username, con, res);
+                deck.getUserDecks(req.body.username, req.body.platform, con, res);
             });
 
             app.post('/deleteDeck', function (req, res) {
@@ -127,6 +127,14 @@ function preventDisconnect() {
 
             app.post('/getListSharedWith', function (req, res) {
                 deck.getListSharedWith(req.body.name, req.body.username, con, res);
+            });
+
+            app.post('/getDeckListSharedWith', function (req, res) {
+                deck.getDeckListSharedWith(req.body.username, req.body.platform, con, res);
+            });
+
+            app.post('/getVisibleDecks', function (req, res) {
+                deck.getVisibleDecks(req.body.username, req.body.platform, con, res);
             });
         }
     });
