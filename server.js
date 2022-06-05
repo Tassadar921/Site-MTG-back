@@ -4,6 +4,7 @@ const logger = require('morgan');
 const methodOverride = require('method-override');
 const cors = require('cors');
 const mysql = require('mysql');
+const axios = require('axios');
 
 const session = require("express-session")({
     secret: "eb8fcc253281389225b4f7872f2336918ddc7f689e1fc41b64d5c4f378cdc438",
@@ -18,6 +19,7 @@ const session = require("express-session")({
 const account = require('./modules/checkingAccounts.js');
 const mail = require('./modules/sendMail');
 const deck = require ('./modules/decks&SQL');
+const scryfall = require('./modules/scryfall');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -122,11 +124,11 @@ function preventDisconnect() {
             });
 
             app.post('/shareDeckWith', function (req, res) {
-                deck.shareWith(req.body.name, req.body.username, req.body.with, con, res);
+                deck.shareWith(req.body.id, req.body.with, req.body.owner, con, res);
             });
 
             app.post('/getListSharedWith', function (req, res) {
-                deck.getListSharedWith(req.body.name, req.body.username, con, res);
+                deck.getListSharedWith(req.body.id, con, res);
             });
 
             app.post('/getDeckListSharedWith', function (req, res) {
@@ -135,6 +137,10 @@ function preventDisconnect() {
 
             app.post('/getVisibleDecks', function (req, res) {
                 deck.getVisibleDecks(req.body.username, req.body.platform, con, res);
+            });
+
+            app.post('/getDeck', function (req, res) {
+                deck.getDeck(req.body.username, req.body.id, con, res);
             });
         }
     });
