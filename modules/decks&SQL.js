@@ -7,9 +7,6 @@ module.exports.uploadDeck = function (deckName, username, deckList, forEveryone,
                 throw e;
             } else {
                 if (!r.length) { //si non on enregistre tout ça
-                    const hour = hourModule.getHour();
-                    const deckListString = JSON.stringify(deckList);
-                    const bool = Number(forEveryone);
                     const sql = `INSERT INTO decks (
                             name,
                             owner,
@@ -23,14 +20,15 @@ module.exports.uploadDeck = function (deckName, username, deckList, forEveryone,
                             red,
                             green,
                             colorless,
-                            id
-                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`;
+                            id,
+                            commanders
+                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
                     con.query(sql, [
-                        deckName,
+                        deckName.replace(/  +/g, ' '),
                         username,
-                        bool,
-                        deckListString,
-                        hour,
+                        Number(forEveryone),
+                        JSON.stringify(deckList),
+                        hourModule.getHour(),
                         username,
                         colors.white,
                         colors.blue,
@@ -38,7 +36,8 @@ module.exports.uploadDeck = function (deckName, username, deckList, forEveryone,
                         colors.red,
                         colors.green,
                         colors.colorless,
-                        username+deckName
+                        (username + deckName).replace(/  +/g, ' '),
+                        JSON.stringify([]),
                     ], (err) => {
                         if (err) {
                             throw err;
@@ -54,7 +53,7 @@ module.exports.uploadDeck = function (deckName, username, deckList, forEveryone,
 };
 
 module.exports.getUserDecks = function (username, platform, con, res) {
-    if(platform==='small') {
+    if (platform === 'small') {
         con.query('SELECT name, lastUpdated, whoModifiedLast, id FROM decks WHERE owner = ? ORDER BY name', [username], (err, result) => {
             if (err) {
                 throw err;
@@ -71,7 +70,7 @@ module.exports.getUserDecks = function (username, platform, con, res) {
                 return res.json({list: tab});
             }
         });
-    }else if(platform==='large'){
+    } else if (platform === 'large') {
         con.query('SELECT name, lastUpdated, whoModifiedLast, white, blue, black, red, green, colorless, id FROM decks WHERE owner = ? ORDER BY name', [username], (err, result) => {
             if (err) {
                 throw err;
@@ -112,9 +111,9 @@ module.exports.getListSharedWith = function (deckId, con, res) {
         if (e) {
             throw e;
         } else {
-            if(r.length) {
+            if (r.length) {
                 return res.json({output: r[0].sharedWith});
-            }else{
+            } else {
                 return res.json({output: ' '});
             }
         }
@@ -133,7 +132,7 @@ module.exports.shareWith = function (deckId, sharingWithList, nickname, con, res
 
 module.exports.getDeckListSharedWith = function (username, platform, con, res) {
     username = ' ' + username + ' ';
-    if(platform==='small') {
+    if (platform === 'small') {
         con.query('SELECT name, owner, lastUpdated, whoModifiedLast, id FROM decks WHERE sharedWith in (?) > 0', [username], (err, result) => {
             if (err) {
                 throw err;
@@ -151,7 +150,7 @@ module.exports.getDeckListSharedWith = function (username, platform, con, res) {
                 res.json({output: tab});
             }
         });
-    }else if(platform==='large'){
+    } else if (platform === 'large') {
         con.query('SELECT name, lastUpdated, whoModifiedLast, owner, white, blue, black, red, green, colorless, id FROM decks WHERE sharedWith in (?) > 0', [username], (err, result) => {
             if (err) {
                 throw err;
@@ -178,9 +177,9 @@ module.exports.getDeckListSharedWith = function (username, platform, con, res) {
     }
 };
 
-module.exports.getVisibleDecks = function (username, platform, con, res){
-    const user = ' '+username+' ';
-    if(platform==='small') {
+module.exports.getVisibleDecks = function (username, platform, con, res) {
+    const user = ' ' + username + ' ';
+    if (platform === 'small') {
         con.query('SELECT name, lastUpdated, whoModifiedLast, owner, id FROM decks WHERE owner = ? ORDER BY name', [username], (err, result) => {
             if (err) {
                 throw err;
@@ -197,9 +196,9 @@ module.exports.getVisibleDecks = function (username, platform, con, res){
                     });
                 }
                 con.query('SELECT name, lastUpdated, whoModifiedLast, owner, id FROM decks WHERE INSTR(sharedWith , ?) > 0 ORDER BY name', [user], (e, r) => {
-                    if(e){
+                    if (e) {
                         throw e;
-                    }else{
+                    } else {
                         for (const line of r) {
                             tab.push({
                                 deckName: line.name,
@@ -210,10 +209,10 @@ module.exports.getVisibleDecks = function (username, platform, con, res){
                                 id: line.id,
                             });
                         }
-                        con.query('SELECT name, lastUpdated, whoModifiedLast, owner, id FROM decks WHERE (NOT INSTR(sharedWith , ?) > 0) AND (owner <> ?) AND (public = 1) ORDER BY name', [user, username], (er,re) => {
-                            if(er){
+                        con.query('SELECT name, lastUpdated, whoModifiedLast, owner, id FROM decks WHERE (NOT INSTR(sharedWith , ?) > 0) AND (owner <> ?) AND (public = 1) ORDER BY name', [user, username], (er, re) => {
+                            if (er) {
                                 throw er;
-                            }else{
+                            } else {
                                 for (const line of re) {
                                     tab.push({
                                         deckName: line.name,
@@ -231,7 +230,7 @@ module.exports.getVisibleDecks = function (username, platform, con, res){
                 });
             }
         });
-    }else if(platform==='large'){
+    } else if (platform === 'large') {
         con.query('SELECT name, lastUpdated, whoModifiedLast, owner, white, blue, black, red, green, colorless, id FROM decks WHERE owner = ? ORDER BY name', [username], (err, result) => {
             if (err) {
                 throw err;
@@ -254,9 +253,9 @@ module.exports.getVisibleDecks = function (username, platform, con, res){
                     });
                 }
                 con.query('SELECT name, lastUpdated, whoModifiedLast, owner, white, blue, black, red, green, colorless, id FROM decks WHERE INSTR(sharedWith , ?) > 0 ORDER BY name', [user], (e, r) => {
-                    if(e){
+                    if (e) {
                         throw e;
-                    }else{
+                    } else {
                         for (const line of r) {
                             tab.push({
                                 deckName: line.name,
@@ -273,10 +272,10 @@ module.exports.getVisibleDecks = function (username, platform, con, res){
                                 id: line.id,
                             });
                         }
-                        con.query('SELECT name, lastUpdated, whoModifiedLast, owner, white, blue, black, red, green, colorless, id FROM decks WHERE (NOT INSTR(sharedWith , ?) > 0) AND (owner <> ?) AND (public = 1) ORDER BY name', [user, username], (er,re) => {
-                            if(er){
+                        con.query('SELECT name, lastUpdated, whoModifiedLast, owner, white, blue, black, red, green, colorless, id FROM decks WHERE (NOT INSTR(sharedWith , ?) > 0) AND (owner <> ?) AND (public = 1) ORDER BY name', [user, username], (er, re) => {
+                            if (er) {
                                 throw er;
-                            }else{
+                            } else {
                                 for (const line of re) {
                                     tab.push({
                                         deckName: line.name,
@@ -303,37 +302,38 @@ module.exports.getVisibleDecks = function (username, platform, con, res){
     }
 };
 
-module.exports.getDeck = function (username, id, con, res){
-   con.query('SELECT * FROM decks WHERE id = ?', [id], (e, r) => {
-       if(e){
-           throw e;
-       }else {
-           if(r.length) {
-               let rightLevel = 0;
-               if (r[0].sharedWith.includes(' ' + username + ' ') || r[0].owner === username) {
-                   rightLevel = 1;
-               }
-               return res.json({
-                   output: {
-                       deckName: r[0].name,
-                       owner: r[0].owner,
-                       lastUpdated: r[0].lastUpdated,
-                       list: JSON.parse(r[0].list),
-                       whoModifiedLast: r[0].whoModifiedLast,
-                       white: r[0].white,
-                       blue: r[0].blue,
-                       black: r[0].black,
-                       red: r[0].red,
-                       green: r[0].green,
-                       colorless: r[0].colorless,
-                       canModify: rightLevel,
-                       commander: r[0].commander,
-                       status: 1
-                   }
-               });
-           }else{
-               res.json({output:{status:0}});
-           }
-       }
-   });
+module.exports.getDeck = function (username, id, con, res) {
+    con.query('SELECT * FROM decks WHERE id = ?', [id], (e, r) => {
+        console.log('id : ', id);
+        if (e) {
+            throw e;
+        } else {
+            if (r.length) {
+                let rightLevel = 0;
+                if (r[0].sharedWith.includes(' ' + username + ' ') || r[0].owner === username) {
+                    rightLevel = 1;
+                }
+                return res.json({
+                    output: {
+                        deckName: r[0].name,
+                        owner: r[0].owner,
+                        lastUpdated: r[0].lastUpdated,
+                        list: JSON.parse(r[0].list),
+                        whoModifiedLast: r[0].whoModifiedLast,
+                        white: r[0].white,
+                        blue: r[0].blue,
+                        black: r[0].black,
+                        red: r[0].red,
+                        green: r[0].green,
+                        colorless: r[0].colorless,
+                        canModify: rightLevel,
+                        commanders: JSON.parse(r[0].commanders),
+                        status: 1
+                    }
+                });
+            } else {
+                res.json({output: {status: 0}});
+            }
+        }
+    });
 };
